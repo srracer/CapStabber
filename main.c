@@ -88,7 +88,7 @@ void Wait(uint32_t time){
 #define HX711_CLK_PIN GPIO_PIN_6
 
 #define CAL_WEIGHT 200                // build in 200g into code for calibration weight
-#define CAL_MEASUREMENTS 20
+#define CAL_MEASUREMENTS 100
 
 // These variables are used to store the Load Cell measurement data
 char weight_string[8];
@@ -97,6 +97,7 @@ int32_t LoadCell;
 int32_t loadcell_cal_zero=0;
 int32_t loadcell_cal_weight=1;
 uint32_t cal_data_eeprom[2];  //unsigned for eeprom writing
+uint32_t number_of_measurements=0;
 
 float weight;
 
@@ -153,14 +154,14 @@ void hx711_init (void) {
 
 void hx711_power_up(void)
 {
-	GPIOPinWrite(HX711_CLK_BASE, HX711_CLK_PIN, 0);
+	GPIOPinWrite(HX711_CLK_BASE, HX711_CLK_PIN, 0); //set low
 }
 
 void hx711_power_down(void)
 {
 
-	GPIOPinWrite(HX711_CLK_BASE, HX711_CLK_PIN, HX711_CLK_PIN);
-	Wait(62); //must be longer than 60 microseconds to send into power down mode.  device restarts at 128gain on ch. a
+	GPIOPinWrite(HX711_CLK_BASE, HX711_CLK_PIN, HX711_CLK_PIN); //set high
+	Wait(61); //must be longer than 60 microseconds to send into power down mode.  device restarts at 128gain on ch. a
 }
 
 int32_t hx711_getvalue(void)
@@ -168,7 +169,7 @@ int32_t hx711_getvalue(void)
 	int8_t i;
 	uint32_t data=0;
 
-	hx711_power_up();
+	GPIOPinWrite(HX711_CLK_BASE, HX711_CLK_PIN, 0); //set low to power up
 
 	while ((GPIOPinRead(HX711_DO_BASE, HX711_DO_PIN) & HX711_DO_PIN));  // Wait until Output pin goes low to start reading data
 	for (i = 0; i<25; i++)
@@ -187,7 +188,8 @@ int32_t hx711_getvalue(void)
 	GPIOPinWrite(HX711_CLK_BASE, HX711_CLK_PIN, HX711_CLK_PIN);
 	GPIOPinWrite(HX711_CLK_BASE, HX711_CLK_PIN, 0);
 
-	hx711_power_down();
+	GPIOPinWrite(HX711_CLK_BASE, HX711_CLK_PIN, HX711_CLK_PIN); //set high
+	Wait(61); //Need to delay to shut off sensor
 
 	data ^= 0x800000;  //2's complement
 
@@ -311,8 +313,8 @@ void ResetTestScreen(void);
 
 extern tCanvasWidget g_psMainPanel;
 extern tCanvasWidget g_psTestPanel;
-extern tCanvasWidget g_psCalibrationPanel;
-extern tCanvasWidget g_psInfoPanel;
+extern tCanvasWidget g_psCalibrateScalePanel;
+extern tCanvasWidget g_psScaleReadingPanel;
 extern tPushButtonWidget g_CalStep1Button;
 extern tPushButtonWidget g_CalStep2Button;
 extern tPushButtonWidget g_CalStep3Button;
@@ -320,8 +322,8 @@ extern tPushButtonWidget g_StartTestButton;
 
 void OnTestScreenButton(tWidget *pWidget);
 void OnStartTestButton(tWidget *pWidget);
-void OnCalibrateButton(tWidget *pWidget);
-void OnInfoButton(tWidget *pWidget);
+void OnCalibrateScaleButton(tWidget *pWidget);
+void OnScaleReadingButton(tWidget *pWidget);
 void OnReturnToMainButton(tWidget *pWidget);
 void OnCalStep1Button(tWidget *pWidget);
 void OnCalStep2Button(tWidget *pWidget);
@@ -330,18 +332,22 @@ void OnCalStep3Button(tWidget *pWidget);
 bool main_menu=TRUE;
 
 //Main Menu Panel
-RectangularButton(g_InfoButton, &g_psMainPanel, 0, 0, &g_sKentec320x240x16_SSD2119,
-		170, 100, 125, 50, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
-                PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrWhite, ClrWhite, ClrRed, ClrRed, &g_sFontCmss14, "Information", 0, 0, 0, 0, OnInfoButton);
-RectangularButton(g_SetupScreenButton, &g_psMainPanel, &g_InfoButton, 0, &g_sKentec320x240x16_SSD2119,
-		25, 100, 125, 50, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
-                PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrWhite, ClrWhite, ClrRed, ClrRed, &g_sFontCmss14, "Setup Screen", 0, 0, 0, 0, 0);
-RectangularButton(g_StartCalibrationButton, &g_psMainPanel, &g_SetupScreenButton, 0, &g_sKentec320x240x16_SSD2119,
-		170, 35, 125, 50, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
-                PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrWhite, ClrWhite, ClrRed, ClrRed, &g_sFontCmss14, "Calibrate Screen", 0, 0, 0, 0, OnCalibrateButton);
-RectangularButton(g_TestScreenButton, &g_psMainPanel, &g_StartCalibrationButton, 0, &g_sKentec320x240x16_SSD2119,
-		25, 35, 125, 50, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
-                PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrWhite, ClrWhite, ClrRed, ClrRed, &g_sFontCmss14, "Test Screen", 0, 0, 0, 0, OnTestScreenButton);
+//Each line represents an element in that panel
+RectangularButton(g_CalibrateZButton, &g_psMainPanel, 0, 0, &g_sKentec320x240x16_SSD2119,
+		170, 85, 125, 40, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
+                PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrWhite, ClrWhite, ClrRed, ClrRed, &g_sFontCmss14, "Calibrate Z-Axis", 0, 0, 0, 0, 0);
+RectangularButton(g_ScaleReadingButton, &g_psMainPanel, &g_CalibrateZButton, 0, &g_sKentec320x240x16_SSD2119,
+		170, 135, 125, 40, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
+                PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrWhite, ClrWhite, ClrRed, ClrRed, &g_sFontCmss14, "Scale Reading", 0, 0, 0, 0, OnScaleReadingButton);
+RectangularButton(g_TestConfigButton, &g_psMainPanel, &g_ScaleReadingButton, 0, &g_sKentec320x240x16_SSD2119,
+		25, 85, 125, 40, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
+                PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrWhite, ClrWhite, ClrRed, ClrRed, &g_sFontCmss14, "Test Configuration", 0, 0, 0, 0, 0);
+RectangularButton(g_CalibrateScaleButton, &g_psMainPanel, &g_TestConfigButton, 0, &g_sKentec320x240x16_SSD2119,
+		170, 35, 125, 40, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
+                PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrWhite, ClrWhite, ClrRed, ClrRed, &g_sFontCmss14, "Calibrate Scale", 0, 0, 0, 0, OnCalibrateScaleButton);
+RectangularButton(g_TestScreenButton, &g_psMainPanel, &g_CalibrateScaleButton, 0, &g_sKentec320x240x16_SSD2119,
+		25, 35, 125, 40, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
+                PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrWhite, ClrWhite, ClrRed, ClrRed, &g_sFontCmss14, "Test Caps", 0, 0, 0, 0, OnTestScreenButton);
 
 //Start Test Panel
 //Test results text
@@ -353,9 +359,9 @@ RectangularButton(g_StartTestButton, 0,0,0, &g_sKentec320x240x16_SSD2119,
 		230, 70, 80, 50, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
         PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrWhite, ClrWhite, ClrRed, ClrRed, &g_sFontCmss12, "Start Test", 0, 0, 0, 0, OnStartTestButton);
 
-//Calibrate Panel
+//Calibrate Scale Panel
 // Step 1
-Canvas(g_sCalibrationStep1, &g_psCalibrationPanel, 0, &g_CalStep1Button, &g_sKentec320x240x16_SSD2119, 0, 30,
+Canvas(g_sCalibrationStep1, &g_psCalibrateScalePanel, 0, &g_CalStep1Button, &g_sKentec320x240x16_SSD2119, 0, 30,
 	       320, 40, (CANVAS_STYLE_FILL | CANVAS_STYLE_OUTLINE | CANVAS_STYLE_TEXT | CANVAS_STYLE_TEXT_LEFT),
 		   ClrWhite, ClrRed, ClrRed, &g_sFontCmss12, "Remove vials and weights, then...", 0, 0);
 Canvas(g_sCalStep1Result, &g_sCalibrationStep1, 0, 0, &g_sKentec320x240x16_SSD2119, 240, 35, 80, 30, CANVAS_STYLE_TEXT,
@@ -364,6 +370,7 @@ RectangularButton(g_CalStep1Button, &g_sCalibrationStep1, &g_sCalStep1Result, 0,
 		170, 35, 65, 30, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
         PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrSilver, ClrSilver, ClrRed, ClrBlue, &g_sFontCmss12b, "PRESS", 0, 0, 0, 0, OnCalStep1Button);
 
+//Calibrate Scale Panel continued
 // Step 2
 Canvas(g_sCalibrationStep2, 0, 0, &g_CalStep2Button, &g_sKentec320x240x16_SSD2119, 0, 80,
 	       320, 40, (CANVAS_STYLE_FILL | CANVAS_STYLE_OUTLINE | CANVAS_STYLE_TEXT | CANVAS_STYLE_TEXT_LEFT),
@@ -374,10 +381,19 @@ RectangularButton(g_CalStep2Button, &g_sCalibrationStep2, &g_sCalStep2Result, 0,
 		170, 85, 65, 30, (PB_STYLE_OUTLINE | PB_STYLE_TEXT_OPAQUE | PB_STYLE_TEXT |
         PB_STYLE_FILL | PB_STYLE_RELEASE_NOTIFY), ClrSilver, ClrSilver, ClrRed, ClrBlue, &g_sFontCmss12b, "PRESS", 0, 0, 0, 0, OnCalStep2Button);
 
-//Information Screeen
-Canvas(g_sLoadCellValue, &g_psInfoPanel, 0, 0, &g_sKentec320x240x16_SSD2119, 0, 30,
+//Scale Reading Panel Screen
+Canvas(g_sLoadCellValue, &g_psScaleReadingPanel, 0, 0, &g_sKentec320x240x16_SSD2119, 0, 30,
 	       320, 40, (CANVAS_STYLE_FILL | CANVAS_STYLE_OUTLINE | CANVAS_STYLE_TEXT | CANVAS_STYLE_TEXT_LEFT),
 		   ClrWhite, ClrRed, ClrRed, &g_sFontCmss12, "Waiting for first measurement....", 0, 0);
+
+//Calibrate Z Panel Screen
+// List all widgents in the Z cal screen
+
+//Test Configuration Panel Screen
+// List all widgets in the setup screen
+// vial height, plunge depth, speed?, pass/fail threshold, save name?
+
+
 
 // An set of canvas widgets, one per panel.  Each canvas is filled with
 // black, overwriting the contents of the previous panel.  These are the parent widgets
@@ -385,10 +401,14 @@ Canvas(g_psMainPanel,0, 0, &g_TestScreenButton, &g_sKentec320x240x16_SSD2119, 0,
 		320, 166, CANVAS_STYLE_FILL, ClrBlack, 0, 0, 0, 0, 0, 0);
 Canvas(g_psTestPanel,0, 0, &g_TestingResults, &g_sKentec320x240x16_SSD2119, 0, 24,
 		320, 166, CANVAS_STYLE_FILL, ClrBlack, 0, 0, 0, 0, 0, 0);
-Canvas(g_psCalibrationPanel,0, 0, &g_sCalibrationStep1, &g_sKentec320x240x16_SSD2119, 0, 24,
+Canvas(g_psCalibrateScalePanel,0, 0, &g_sCalibrationStep1, &g_sKentec320x240x16_SSD2119, 0, 24,
 		320, 166, CANVAS_STYLE_FILL, ClrBlack, 0, 0, 0, 0, 0, 0);
-Canvas(g_psInfoPanel,0, 0, &g_sLoadCellValue, &g_sKentec320x240x16_SSD2119, 0, 24,
+Canvas(g_psScaleReadingPanel,0, 0, &g_sLoadCellValue, &g_sKentec320x240x16_SSD2119, 0, 24,
 		320, 166, CANVAS_STYLE_FILL, ClrBlack, 0, 0, 0, 0, 0, 0);
+//Canvas(g_psCalibrateZPanel,0, 0, &g_sCalZStep1, &g_sKentec320x240x16_SSD2119, 0, 24,
+//		320, 166, CANVAS_STYLE_FILL, ClrBlack, 0, 0, 0, 0, 0, 0);
+//Canvas(g_psTestConfigPanel,0, 0, &g_sLoadCellValue, &g_sKentec320x240x16_SSD2119, 0, 24,
+//		320, 166, CANVAS_STYLE_FILL, ClrBlack, 0, 0, 0, 0, 0, 0);
 
 // The text and Return to Main button at the bottom of the screen.
 Canvas(g_sTitle, 0, 0, 0, &g_sKentec320x240x16_SSD2119, 50, 200, 220, 40,
@@ -480,46 +500,47 @@ OnTestScreenButton(tWidget *pWidget)
 
 // Handles presses of the Calibrate Button
 void
-OnCalibrateButton(tWidget *pWidget)
+OnCalibrateScaleButton(tWidget *pWidget)
 {
     // Set the title of this panel.
-    CanvasTextSet(&g_sTitle, "   Calibration   ");
+    CanvasTextSet(&g_sTitle, "   Calibrate Scale  ");
     WidgetPaint((tWidget *)&g_sTitle);
-
-    TurnOnReturnToMain();
 
 	// Remove the Main Menu
     WidgetRemove((tWidget *)&g_psMainPanel);
 
+    TurnOnReturnToMain();
+
     // Add and draw the Start Test panel
     ResetCalScreen();
-    WidgetAdd(WIDGET_ROOT, (tWidget *)&g_psCalibrationPanel);
-    WidgetPaint((tWidget *)&g_psCalibrationPanel);
+    WidgetAdd(WIDGET_ROOT, (tWidget *)&g_psCalibrateScalePanel);
+    WidgetPaint((tWidget *)&g_psCalibrateScalePanel);
 }
 
 
 // Handles presses of the Information Button
 void
-OnInfoButton(tWidget *pWidget)
+OnScaleReadingButton(tWidget *pWidget)
 {
     // Set the title of this panel.
-    CanvasTextSet(&g_sTitle, "   Information   ");
+    CanvasTextSet(&g_sTitle, "   Scale Reading   ");
     WidgetPaint((tWidget *)&g_sTitle);
 
 	// Remove the Main Menu
     WidgetRemove((tWidget *)&g_psMainPanel);
+
     TurnOnReturnToMain();
 
     // Add and draw the Information panel
     ResetInfoScreen();
-    WidgetAdd(WIDGET_ROOT, (tWidget *)&g_psInfoPanel);
-    WidgetPaint((tWidget *)&g_psInfoPanel);
+    WidgetAdd(WIDGET_ROOT, (tWidget *)&g_psScaleReadingPanel);
+    WidgetPaint((tWidget *)&g_psScaleReadingPanel);
 	WidgetMessageQueueProcess();
 
 	while (main_menu==FALSE)
 	{
 
-		LoadCell = hx711_average(5); // take 5 samples of load cell reading
+		LoadCell = hx711_average(1); // take sample(s) of load cell reading
 
 		weight = scaled_reading(LoadCell);
 
@@ -530,9 +551,9 @@ OnInfoButton(tWidget *pWidget)
 
     	TouchScreenCallbackSet(WidgetPointerMessage);
 
-    	Wait(150);
-
     	WidgetMessageQueueProcess();
+
+    	Wait(150);
     }
 
 }
@@ -544,7 +565,7 @@ OnReturnToMainButton(tWidget *pWidget)
     //kill the sampling widget
     main_menu=TRUE;
 
-    Wait (100); // wait for last message to be updated on information screen
+    Wait (200); // wait for last message to be updated on information screen
 
 	// Set the title of this panel.
 	CanvasTextSet(&g_sTitle, "   Main Menu   ");
@@ -553,11 +574,11 @@ OnReturnToMainButton(tWidget *pWidget)
     TurnOffReturnToMain();
 
 	// Remove the previous screen Menu
-    WidgetRemove((tWidget *)&g_psCalibrationPanel);
+    WidgetRemove((tWidget *)&g_psCalibrateScalePanel);
     WidgetRemove((tWidget *)&g_sCalibrationStep2);
     WidgetRemove((tWidget *)&g_psTestPanel);
     WidgetRemove((tWidget *)&g_StartTestButton);
-    WidgetRemove((tWidget *)&g_psInfoPanel);
+    WidgetRemove((tWidget *)&g_psScaleReadingPanel);
 
     // Add and draw the Main Menu panel
     WidgetAdd(WIDGET_ROOT, (tWidget *)&g_psMainPanel);
@@ -631,18 +652,20 @@ void OnCalStep1Button (tWidget *pWidget)
 	loadcell_cal_zero = hx711_average(CAL_MEASUREMENTS); // take samples of load cell reading
 	cal_data_eeprom[0] = (uint32_t)loadcell_cal_zero;				// copy to eeprom array
 
-	//add exception handling if value is out of expected range
-	CanvasTextSet(&g_sCalStep1Result, "...Success...");
-	CanvasTextOpaqueOn(&g_sCalStep1Result);
-	WidgetPaint((tWidget *)&g_sCalStep1Result);
-
     // Change Text of Button
 	PushButtonTextSet(&g_CalStep1Button, "Done");
 	PushButtonCallbackSet(&g_CalStep1Button, 0);
     WidgetPaint((tWidget *)&g_CalStep1Button);
+    WidgetMessageQueueProcess();
+
+	//add exception handling if value is out of expected range
+	CanvasTextSet(&g_sCalStep1Result, "...Success...");
+	CanvasTextOpaqueOn(&g_sCalStep1Result);
+	WidgetPaint((tWidget *)&g_sCalStep1Result);
+	WidgetMessageQueueProcess();
 
     //Add Cal Step 2 to Widget Tree
-	WidgetAdd((tWidget *)&g_psCalibrationPanel, (tWidget *)&g_sCalibrationStep2);
+	WidgetAdd((tWidget *)&g_psCalibrateScalePanel, (tWidget *)&g_sCalibrationStep2);
     WidgetPaint((tWidget *)&g_sCalibrationStep2);
 }
 
@@ -660,33 +683,34 @@ void OnCalStep2Button (tWidget *pWidget)
 
 	EEPROMProgram(cal_data_eeprom, 0x0, sizeof(cal_data_eeprom));
 
-	//add exception handling if value is out of expected range
-	CanvasTextSet(&g_sCalStep2Result, "...Success...");
-	CanvasTextOpaqueOn(&g_sCalStep2Result);
-    WidgetPaint((tWidget *)&g_sCalStep2Result);
-
     // Change Text of Button
 	PushButtonTextSet(&g_CalStep2Button, "Done");
 	PushButtonCallbackSet(&g_CalStep2Button, 0);
     WidgetPaint((tWidget *)&g_CalStep2Button);
+	WidgetMessageQueueProcess();
+
+	//add exception handling if value is out of expected range
+	CanvasTextSet(&g_sCalStep2Result, "...Success...");
+	CanvasTextOpaqueOn(&g_sCalStep2Result);
+    WidgetPaint((tWidget *)&g_sCalStep2Result);
+	WidgetMessageQueueProcess();
 
 }
-
 
 void OnStartTestButton (tWidget *pWidget)
 {
 	// Set motion parameters (could be configurable in GUI later)
-	float total_move_distance=5;  //mm
-	float travel_speed=2;   //mm/s
+	float total_move_distance=20;  //mm
+	float travel_speed=5;   //mm/s
 
 	uint32_t total_move_steps = mm_to_steps(total_move_distance);
 
 	float peak_loadcell_reading=0.0;
 	char result[40];
+	number_of_measurements=0;
 
 	// Disable Test and return to main buttons during test
 	TurnOffStartTest();
-	//WidgetRemove((tWidget *)&g_StartTestButton);
 	TurnOffReturnToMain();
 	WidgetMessageQueueProcess();
 
@@ -702,28 +726,26 @@ void OnStartTestButton (tWidget *pWidget)
 
 		// Make Measurement and write to peak if highest
 		LoadCell = hx711_average(1); // take 1 sample for fast timing
+		number_of_measurements++;
 		weight = scaled_reading(LoadCell);
 		if (weight>peak_loadcell_reading) peak_loadcell_reading=weight;
-
-		//Update Screen?
-
 	}
 
 	CanvasTextSet(&g_TestingResults, "Finished..Moving Up-Please Wait...");
 	WidgetPaint((tWidget *)&g_TestingResults);
 	WidgetMessageQueueProcess();
 
-	travel_speed = 5;
+	travel_speed = 10;
 	move_motor(travel_speed, total_move_steps, UP);
 
 	while (steps_to_move>0){}  //wait for motor to stop moving
 
 	// Display test result - add logic to determine pass/fail
 	if (peak_loadcell_reading*0.00220462>3.0){
-		sprintf(result,"Cap FAILED - Peak force measured %2.3f pounds", peak_loadcell_reading*0.00220462);
+		sprintf(result,"FAILED - %2.3f pounds, %5d", peak_loadcell_reading*0.00220462, number_of_measurements);
 	}
 	else if (peak_loadcell_reading*0.00220462<=3.0){
-		sprintf(result,"Cap PASSED - Peak force measured %2.3f pounds", peak_loadcell_reading*0.00220462);
+		sprintf(result,"PASSED - %2.3f pounds, %5d", peak_loadcell_reading*0.00220462, number_of_measurements);
 	}
 
 	CanvasTextSet(&g_TestingResults, result);
@@ -742,6 +764,7 @@ void OnStartTestButton (tWidget *pWidget)
 }
 
 int main(void)
+
 
 {
 	ROM_SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ); // 80Mhz -- 400/2/2.5
