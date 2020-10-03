@@ -12,7 +12,7 @@
 
 //Load Cell Settings
 
-#define CAL_WEIGHT 71                // ground down carbide rod is 71g
+#define CAL_WEIGHT 60                // ground down carbide rod is 71g
 #define CAL_MEASUREMENTS 25
 
 //Declarations

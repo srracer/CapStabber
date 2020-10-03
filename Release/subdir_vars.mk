@@ -23,6 +23,7 @@ C_SRCS += \
 ../StepperMotor.c \
 ../TestCapScreen.c \
 ../frame.c \
+../grlib_demo.c \
 ../images.c \
 ../jmrlogo.c \
 ../main.c \
@@ -40,6 +41,7 @@ C_DEPS += \
 ./StepperMotor.d \
 ./TestCapScreen.d \
 ./frame.d \
+./grlib_demo.d \
 ./images.d \
 ./jmrlogo.d \
 ./main.d \
@@ -57,6 +59,7 @@ OBJS += \
 ./StepperMotor.obj \
 ./TestCapScreen.obj \
 ./frame.obj \
+./grlib_demo.obj \
 ./images.obj \
 ./jmrlogo.obj \
 ./main.obj \
@@ -74,6 +77,7 @@ OBJS__QUOTED += \
 "StepperMotor.obj" \
 "TestCapScreen.obj" \
 "frame.obj" \
+"grlib_demo.obj" \
 "images.obj" \
 "jmrlogo.obj" \
 "main.obj" \
@@ -91,6 +95,7 @@ C_DEPS__QUOTED += \
 "StepperMotor.d" \
 "TestCapScreen.d" \
 "frame.d" \
+"grlib_demo.d" \
 "images.d" \
 "jmrlogo.d" \
 "main.d" \
@@ -108,6 +113,7 @@ C_SRCS__QUOTED += \
 "../StepperMotor.c" \
 "../TestCapScreen.c" \
 "../frame.c" \
+"../grlib_demo.c" \
 "../images.c" \
 "../jmrlogo.c" \
 "../main.c" \

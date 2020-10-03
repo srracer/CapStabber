@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdtprojectproperties>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
+<language name="C++ Source File">
+<includepath>Debug/${COM_TI_TM4C_INCLUDE_PATH}</includepath>
+<includepath>${CG_TOOL_ROOT}/include</includepath>
+<includepath>${TIVAWARE_INSTALL}</includepath>
+
+</language>
+<language name="Assembly Source File">
+<includepath>Debug/${COM_TI_TM4C_INCLUDE_PATH}</includepath>
+<includepath>${CG_TOOL_ROOT}/include</includepath>
+<includepath>${TIVAWARE_INSTALL}</includepath>
+
+</language>
+<language name="C Source File">
+<includepath>Debug/${COM_TI_TM4C_INCLUDE_PATH}</includepath>
+<includepath>${CG_TOOL_ROOT}/include</includepath>
+<includepath>${TIVAWARE_INSTALL}</includepath>
+
+</language>
+<language name="Assembly Source File">
+<includepath>Debug/${COM_TI_TM4C_INCLUDE_PATH}</includepath>
+<includepath>${CG_TOOL_ROOT}/include</includepath>
+<includepath>${TIVAWARE_INSTALL}</includepath>
+
+</language>
+<language name="Linker Command File">
+
+</language>
+<language name="Linker Command File">
+
+</language>
+<language name="Linker Command File">
+
+</language>
+</section>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.Macros">
+<language name="C++ Source File">
+<macro>
+<name>${COM_TI_TM4C_SYMBOLS}</name><value/>
+</macro>
+<macro>
+<name>ccs</name><value>"ccs"</value>
+</macro>
+<macro>
+<name>PART_TM4C123GH6PM</name><value/>
+</macro>
+<macro>
+<name>TARGET_IS_BLIZZARD_RA1</name><value/>
+</macro>
+
+</language>
+<language name="Assembly Source File">
+<macro>
+<name>${COM_TI_TM4C_SYMBOLS}</name><value/>
+</macro>
+<macro>
+<name>ccs</name><value>"ccs"</value>
+</macro>
+<macro>
+<name>PART_TM4C123GH6PM</name><value/>
+</macro>
+<macro>
+<name>TARGET_IS_BLIZZARD_RA1</name><value/>
+</macro>
+
+</language>
+<language name="C Source File">
+<macro>
+<name>${COM_TI_TM4C_SYMBOLS}</name><value/>
+</macro>
+<macro>
+<name>ccs</name><value>"ccs"</value>
+</macro>
+<macro>
+<name>PART_TM4C123GH6PM</name><value/>
+</macro>
+<macro>
+<name>TARGET_IS_BLIZZARD_RA1</name><value/>
+</macro>
+
+</language>
+<language name="Assembly Source File">
+<macro>
+<name>${COM_TI_TM4C_SYMBOLS}</name><value/>
+</macro>
+<macro>
+<name>ccs</name><value>"ccs"</value>
+</macro>
+<macro>
+<name>PART_TM4C123GH6PM</name><value/>
+</macro>
+<macro>
+<name>TARGET_IS_BLIZZARD_RA1</name><value/>
+</macro>
+
+</language>
+<language name="Linker Command File">
+
+</language>
+<language name="Linker Command File">
+
+</language>
+<language name="Linker Command File">
+
+</language>
+</section>
+</cdtprojectproperties>

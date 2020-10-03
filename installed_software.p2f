@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?p2f version='1.0.0'?>
+<p2f version='1.0.0'>
+  <ius size='9'>
+    <iu id='com.ti.cgt.dmed.win32.feature.group' name='Compiler Tools On-line Documentation' version='1.1.5'>
+      <repositories size='1'>
+        <repository location='http://software-dl.ti.com/dsps/dsps_public_sw/sdo_ccstudio/codegen/Updates/p2win32/'/>
+      </repositories>
+    </iu>
+    <iu id='com.ti.ccstudio.debugserver.win32.feature.group' name='Debug Server' version='7.0.0.1808'>
+      <repositories size='1'>
+        <repository location='http://software-dl.ti.com/ccs/esd/CCSv7/Updates'/>
+      </repositories>
+    </iu>
+    <iu id='com.ti.dsflash.win32.feature.group' name='Debug Server Flash' version='7.0.0.1808'>
+      <repositories size='1'>
+        <repository location='http://software-dl.ti.com/ccs/esd/CCSv7/Updates'/>
+      </repositories>
+    </iu>
+    <iu id='com.ti.gcc.arm.win32.feature.group' name='GCC ARM Compiler Tools' version='4.9.3.2015q3_20150921'>
+      <repositories size='1'>
+        <repository location='http://software-dl.ti.com/dsps/dsps_public_sw/sdo_ccstudio/gcc/Updates/win32'/>
+      </repositories>
+    </iu>
+    <iu id='com.ti.msp430.gcc_support.feature.group' name='GCC MSP430 tool-chain' version='7.0.6'>
+      <repositories size='2'>
+        <repository location='http://downloads.ti.com/msp430/esd/v7/updates-430/gcc'/>
+        <repository location='http://software-dl.ti.com/ccs/esd/CCSv7/Updates'/>
+      </repositories>
+    </iu>
+    <iu id='com.ti.ccstudio.installer.win32.feature.group' name='LWInstaller' version='7.0.0.00043'>
+      <repositories size='1'>
+        <repository location='http://software-dl.ti.com/ccs/esd/CCSv7/Updates'/>
+      </repositories>
+    </iu>
+    <iu id='com.ti.msp432.build_debug.feature.group' name='MSP432 tool-chain' version='7.1.3'>
+      <repositories size='1'>
+        <repository location='http://software-dl.ti.com/ccs/esd/CCSv7/Updates'/>
+      </repositories>
+    </iu>
+    <iu id='com.ti.emulation.pack.win32.feature.group' name='TI Emulators' version='6.0.579.0'>
+      <repositories size='1'>
+        <repository location='http://software-dl.ti.com/ccs/esd/CCSv7/Updates'/>
+      </repositories>
+    </iu>
+    <iu id='com.ti.msp430.build_debug.feature.group' name='TI MSP430 tool-chain' version='7.0.6'>
+      <repositories size='1'>
+        <repository location='http://software-dl.ti.com/ccs/esd/CCSv7/Updates'/>
+      </repositories>
+    </iu>
+  </ius>
+</p2f>

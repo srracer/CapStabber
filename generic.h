@@ -73,7 +73,7 @@
 #define MM_PER_STEPS (LEAD_PITCH/STEPS_PER_REV)
 
 #define PASS_THRESHOLD 3.0 //lbs
-#define Z_CAL_THRESHOLD 10 //grams
+#define Z_CAL_THRESHOLD 25 //grams
 
 //all in mm
 #define NEEDLE_PUNCTURE_DEPTH 9.0

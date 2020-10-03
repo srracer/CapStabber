@@ -105,7 +105,7 @@ void OnCalZStep1Button (tWidget *pWidget)
 
 	while(steps_to_move>0){
 		//compute difference between reading and unloaded - trip at cal threshold, then, stop moving
-		if ((scaled_reading(hx711_average(1))-scaled_reading(unloaded_loadcell))>Z_CAL_THRESHOLD) steps_to_move=0;
+		if ((scaled_reading(hx711_average(5))-scaled_reading(unloaded_loadcell))>Z_CAL_THRESHOLD) steps_to_move=0;
 	}
 
 	// 4. Establish this as Z=0

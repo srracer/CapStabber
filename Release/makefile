@@ -20,6 +20,7 @@ ORDERED_OBJS += \
 "./StepperMotor.obj" \
 "./TestCapScreen.obj" \
 "./frame.obj" \
+"./grlib_demo.obj" \
 "./images.obj" \
 "./jmrlogo.obj" \
 "./main.obj" \
@@ -156,7 +157,7 @@ all: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 CapStabber.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: ARM Linker'
-	"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.0.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me -Ooff --opt_for_speed=0 --define=ccs="ccs" --define=PART_TM4C123GH6PM --define=TARGET_IS_BLIZZARD_RA1 -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"CapStabber.map" --heap_size=0 --stack_size=2048 -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.0.LTS/lib" -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.0.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="CapStabber_linkInfo.xml" --rom_model -o "CapStabber.out" $(ORDERED_OBJS)
+	"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.0.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me -O2 --define=ccs="ccs" --define=PART_TM4C123GH6PM --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"CapStabber.map" --heap_size=0 --stack_size=512 -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.0.LTS/lib" -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.0.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="CapStabber_linkInfo.xml" --rom_model -o "CapStabber.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -169,8 +170,8 @@ CapStabber.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "CalibrateScale.obj" "CalibrateZ.obj" "Kentec320x240x16_ssd2119_spi.obj" "LoadCell.obj" "MicroTimer.obj" "ReturnToMain.obj" "ScaleReading.obj" "StepperMotor.obj" "TestCapScreen.obj" "frame.obj" "images.obj" "jmrlogo.obj" "main.obj" "tm4c123gh6pm_startup_ccs.obj" "touch.obj" 
-	-$(RM) "CalibrateScale.d" "CalibrateZ.d" "Kentec320x240x16_ssd2119_spi.d" "LoadCell.d" "MicroTimer.d" "ReturnToMain.d" "ScaleReading.d" "StepperMotor.d" "TestCapScreen.d" "frame.d" "images.d" "jmrlogo.d" "main.d" "tm4c123gh6pm_startup_ccs.d" "touch.d" 
+	-$(RM) "CalibrateScale.obj" "CalibrateZ.obj" "Kentec320x240x16_ssd2119_spi.obj" "LoadCell.obj" "MicroTimer.obj" "ReturnToMain.obj" "ScaleReading.obj" "StepperMotor.obj" "TestCapScreen.obj" "frame.obj" "grlib_demo.obj" "images.obj" "jmrlogo.obj" "main.obj" "tm4c123gh6pm_startup_ccs.obj" "touch.obj" 
+	-$(RM) "CalibrateScale.d" "CalibrateZ.d" "Kentec320x240x16_ssd2119_spi.d" "LoadCell.d" "MicroTimer.d" "ReturnToMain.d" "ScaleReading.d" "StepperMotor.d" "TestCapScreen.d" "frame.d" "grlib_demo.d" "images.d" "jmrlogo.d" "main.d" "tm4c123gh6pm_startup_ccs.d" "touch.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
